@@ -1,0 +1,178 @@
+.editor-content .tiptap {
+  width: 100%;
+  max-width: 800px;
+  min-height: 100%;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.editor-content .tiptap:focus {
+  outline: none;
+}
+
+/* Placeholder */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--text-muted);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Headings */
+.tiptap h1 { font-size: 2em; font-weight: 700; margin: 0.8em 0 0.4em; line-height: 1.3; }
+.tiptap h2 { font-size: 1.5em; font-weight: 600; margin: 0.6em 0 0.3em; line-height: 1.35; }
+.tiptap h3 { font-size: 1.25em; font-weight: 600; margin: 0.5em 0 0.25em; line-height: 1.4; }
+.tiptap h4 { font-size: 1.1em; font-weight: 600; margin: 0.4em 0 0.2em; }
+
+/* Paragraph */
+.tiptap p {
+  margin: 0.4em 0;
+}
+
+/* Bold, italic, etc. */
+.tiptap strong { font-weight: 600; }
+.tiptap em { font-style: italic; }
+.tiptap s { text-decoration: line-through; }
+.tiptap u { text-decoration: underline; }
+.tiptap sub { font-size: 0.75em; vertical-align: sub; }
+.tiptap sup { font-size: 0.75em; vertical-align: super; }
+
+/* Links */
+.tiptap a {
+  color: var(--primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Inline code */
+.tiptap code {
+  background: var(--code-bg);
+  border-radius: 3px;
+  padding: 2px 5px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--code-color);
+}
+
+/* Code block */
+.tiptap pre {
+  background: var(--code-bg);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin: 12px 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.tiptap pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+}
+
+/* Blockquote */
+.tiptap blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 16px;
+  margin: 12px 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Lists */
+.tiptap ul, .tiptap ol {
+  padding-left: 24px;
+  margin: 8px 0;
+}
+
+.tiptap li {
+  margin: 2px 0;
+}
+
+.tiptap ul li {
+  list-style-type: disc;
+}
+
+.tiptap ol li {
+  list-style-type: decimal;
+}
+
+/* Task list */
+.tiptap ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 4px;
+}
+
+.tiptap ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.tiptap ul[data-type="taskList"] li label input[type="checkbox"] {
+  margin-top: 4px;
+  accent-color: var(--primary);
+}
+
+/* Horizontal rule */
+.tiptap hr {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 16px 0;
+}
+
+/* Tables */
+.tiptap table {
+  border-collapse: collapse;
+  margin: 12px 0;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.tiptap th, .tiptap td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+  min-width: 80px;
+}
+
+.tiptap th {
+  background: var(--bg-hover);
+  font-weight: 600;
+}
+
+.tiptap td.selectedCell, .tiptap th.selectedCell {
+  background: var(--primary-light);
+}
+
+/* Images */
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  margin: 8px 0;
+}
+
+/* Highlight */
+.tiptap mark {
+  background: #fff3bf;
+  border-radius: 2px;
+  padding: 1px 2px;
+}
+
+/* Mention */
+.tiptap .mention {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-weight: 500;
+}

@@ -1,0 +1,16 @@
+.theme-dark {
+  --bg: #1a1b1e;
+  --bg-sidebar: #25262b;
+  --bg-toolbar: #25262b;
+  --bg-statusbar: #25262b;
+  --bg-hover: #2c2e33;
+  --bg-active: #373a40;
+  --border: #373a40;
+  --text: #c1c2c5;
+  --text-secondary: #909296;
+  --text-muted: #5c5f66;
+  --primary: #4c6ef5;
+  --primary-light: #1a2540;
+  --code-bg: #25262b;
+  --code-color: #f06595;
+}

@@ -1,0 +1,16 @@
+.theme-light {
+  --bg: #ffffff;
+  --bg-sidebar: #f8f9fa;
+  --bg-toolbar: #f8f9fa;
+  --bg-statusbar: #f8f9fa;
+  --bg-hover: #e9ecef;
+  --bg-active: #dee2e6;
+  --border: #dee2e6;
+  --text: #212529;
+  --text-secondary: #495057;
+  --text-muted: #868e96;
+  --primary: #4263eb;
+  --primary-light: #dbe4ff;
+  --code-bg: #f1f3f5;
+  --code-color: #e83e8c;
+}

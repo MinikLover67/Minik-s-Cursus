@@ -1,0 +1,11 @@
+node_modules/
+dist/
+release/
+.env
+.env.*
+*.gguf
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

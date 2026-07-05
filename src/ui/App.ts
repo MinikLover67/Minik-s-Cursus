@@ -1,0 +1,216 @@
+import type { CursusEditor } from '../editor/CursusEditor.ts'
+import { setupTheme } from './ThemeManager.ts'
+import { setupWelcomeGuide } from './WelcomeGuide.ts'
+import { setupAiSettings } from './AiSettings.ts'
+import { updateStatusBar, setupStatusBar } from './StatusBar.ts'
+import { setupSidebar } from './Sidebar.ts'
+
+export function initUI(editor: CursusEditor): void {
+  setupTheme()
+  setupWelcomeGuide()
+  setupAiSettings(editor)
+  setupStatusBar(editor)
+  setupSidebar(editor)
+  setupMenuListeners(editor)
+  setupKeyboardShortcuts(editor)
+  setupDragAndDrop(editor)
+}
+
+function setupMenuListeners(editor: CursusEditor): void {
+  const api = window.electronAPI
+
+  api.onMenuEvent('menu:new', () => {
+    editor.clear()
+    editor.currentFile = null
+    editor.currentFormat = 'markdown'
+    updateStatusBar(editor, 'No file open', 0)
+    editor.focus()
+  })
+
+  api.onMenuEvent('menu:open', async () => {
+    const filePath = await api.openFile([
+      { name: 'All Supported', extensions: ['md', 'html', 'txt', 'docx', 'pdf', 'xlsx', 'pptx', 'csv', 'json'] },
+      { name: 'All Files', extensions: ['*'] }
+    ])
+    if (!filePath) return
+    await openFileInEditor(editor, filePath)
+  })
+
+  api.onMenuEvent('menu:save', async () => {
+    if (editor.currentFile) {
+      const content = editor.getHTML()
+      await api.saveFile(editor.currentFile, content, editor.currentFormat)
+    }
+  })
+
+  api.onMenuEvent('menu:save-as', async () => {
+    const content = editor.getHTML()
+    const savedPath = await api.saveFileAs(content, editor.currentFormat)
+    if (savedPath) {
+      editor.currentFile = savedPath
+      updateStatusBar(editor, savedPath, editor.getWordCount())
+    }
+  })
+
+  api.onMenuEvent('menu:fullscreen', () => {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()
+  })
+
+  api.onMenuEvent('menu:theme', () => {
+    const btn = document.getElementById('btn-theme')
+    btn?.click()
+  })
+
+  api.onMenuEvent('menu:ai-settings', () => {
+    document.getElementById('ai-settings-overlay')?.classList.remove('hidden')
+  })
+
+  api.onMenuEvent('menu:guide', () => {
+    document.getElementById('welcome-overlay')?.classList.remove('hidden')
+  })
+
+  api.onMenuEvent('menu:export-pdf', async () => {
+    await exportAsPDF(editor)
+  })
+
+  api.onMenuEvent('menu:export-docx', async () => {
+    await exportAsDOCX(editor)
+  })
+
+  api.onMenuEvent('menu:export-md', async () => {
+    const md = editor.getMarkdown()
+    const savedPath = await api.saveFileAs(md, 'markdown')
+    if (savedPath) {
+      editor.currentFile = savedPath
+      editor.currentFormat = 'markdown'
+    }
+  })
+
+  api.onMenuEvent('menu:about', () => {
+    const version = api.getVersion()
+    window.alert(`Cursus v${version}\n\nAI-powered rich text editor for students and teachers.\n\nMIT License`)
+  })
+}
+
+async function openFileInEditor(editor: CursusEditor, filePath: string): Promise<void> {
+  const content = await window.electronAPI.readFile(filePath)
+  if (!content) return
+
+  const ext = filePath.split('.').pop()?.toLowerCase() || ''
+  const formatMap: Record<string, string> = {
+    md: 'markdown', html: 'html', txt: 'text', docx: 'docx',
+    pdf: 'pdf', xlsx: 'xlsx', pptx: 'pptx', csv: 'csv', json: 'json'
+  }
+  const format = formatMap[ext] || 'unknown'
+  editor.currentFile = filePath
+  editor.currentFormat = format
+
+  if (format === 'markdown' || format === 'html' || format === 'text' || format === 'json') {
+    editor.setContent(content)
+  } else if (format === 'docx') {
+    editor.setContent('<p><em>DOCX content loaded. Full DOCX editing coming soon.</em></p><p>' + content.substring(0, 2000) + '</p>')
+  } else if (format === 'pdf') {
+    editor.setContent('<p><em>PDF content loaded. PDF viewer coming soon.</em></p>')
+  } else if (format === 'xlsx') {
+    editor.setContent('<p><em>Excel file loaded. Spreadsheet editor coming soon.</em></p>')
+  } else {
+    editor.setContent('<p><em>File format not yet fully supported for editing.</em></p>')
+  }
+
+  window.electronAPI.addRecentFile(filePath)
+  updateStatusBar(editor, filePath, editor.getWordCount())
+  editor.focus()
+}
+
+async function exportAsPDF(editor: CursusEditor): Promise<void> {
+  const html = editor.getHTML()
+  const savedPath = await window.electronAPI.saveFileAs(html, 'pdf')
+  if (savedPath) {
+    window.alert('PDF exported to: ' + savedPath)
+  }
+}
+
+async function exportAsDOCX(editor: CursusEditor): Promise<void> {
+  const html = editor.getHTML()
+  const savedPath = await window.electronAPI.saveFileAs(html, 'docx')
+  if (savedPath) {
+    window.alert('DOCX exported to: ' + savedPath)
+  }
+}
+
+function setupKeyboardShortcuts(editor: CursusEditor): void {
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key) {
+        case 's':
+          e.preventDefault()
+          if (e.shiftKey) {
+            document.getElementById('btn-save-as')?.click()
+          } else {
+            document.getElementById('btn-save')?.click()
+          }
+          break
+        case 'o':
+          e.preventDefault()
+          document.getElementById('btn-open')?.click()
+          break
+        case 'n':
+          e.preventDefault()
+          document.getElementById('btn-new')?.click()
+          break
+      }
+    }
+  })
+}
+
+function setupDragAndDrop(editor: CursusEditor): void {
+  const content = document.getElementById('editor-content')
+  if (!content) return
+
+  content.addEventListener('dragover', (e) => {
+    e.preventDefault()
+    e.dataTransfer!.dropEffect = 'copy'
+  })
+
+  content.addEventListener('drop', async (e) => {
+    e.preventDefault()
+    const files = e.dataTransfer?.files
+    if (!files || files.length === 0) return
+
+    for (const file of Array.from(files)) {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader()
+        reader.onload = () => {
+          editor.editor.chain().focus().setImage({ src: reader.result as string }).run()
+        }
+        reader.readAsDataURL(file)
+      } else if (file.type.startsWith('video/')) {
+        const url = URL.createObjectURL(file)
+        editor.editor.commands.insertContent(`<video controls src="${url}" style="max-width:100%"></video>`)
+      } else {
+        const path = (file as any).path
+        if (path) {
+          await openFileInEditor(editor, path)
+        }
+      }
+    }
+  })
+
+  document.addEventListener('paste', (e) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith('image/')) {
+        const blob = item.getAsFile()
+        if (blob) {
+          const reader = new FileReader()
+          reader.onload = () => {
+            editor.editor.chain().focus().setImage({ src: reader.result as string }).run()
+          }
+          reader.readAsDataURL(blob)
+        }
+      }
+    }
+  })
+}
