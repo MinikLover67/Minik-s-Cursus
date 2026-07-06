@@ -41,8 +41,8 @@ A modern desktop editor for students and teachers. Write, edit, and manage docum
 
 | File | Type | Size | Description |
 |------|------|------|-------------|
-| [Cursus Setup 1.0.0.exe](publish/Cursus%20Setup%201.0.0.exe) | **Installer** (NSIS) | ~91 MB | Full installer, registers file associations, adds start menu & desktop shortcuts |
-| [Cursus-1.0.0-portable.exe](publish/Cursus-1.0.0-portable.exe) | **Portable** | ~91 MB | No installation needed, run from USB or anywhere |
+| [Cursus Setup 1.0.0.exe](https://github.com/MinikLover67/Minik-s-Cursus/releases/tag/v1.0.0) | **Installer** (NSIS) | ~91 MB | Full installer, registers file associations, adds start menu & desktop shortcuts |
+| [Cursus-1.0.0-portable.exe](https://github.com/MinikLover67/Minik-s-Cursus/releases/tag/v1.0.0) | **Portable** | ~91 MB | No installation needed, run from USB or anywhere |
 
 **Which one should I download?**
 - **Installer** — If you want Cursus to appear in the "Open with" dialog for PDF/DOCX/etc. files. Requires admin rights to install.
