@@ -9,8 +9,9 @@ const electronAPI = {
 
   saveFileAs: (content: string, format: string, defaultName?: string) =>
     ipcRenderer.invoke('dialog:save-file', {
-      defaultName,
+      defaultName: defaultName || 'document',
       filters: [
+        { name: 'All Supported Files', extensions: ['pdf', 'docx', 'md', 'html', 'txt', 'pptx', 'png', 'jpg', 'json', 'csv'] },
         { name: 'PDF Document', extensions: ['pdf'] },
         { name: 'Word Document', extensions: ['docx'] },
         { name: 'Markdown', extensions: ['md'] },
@@ -21,6 +22,7 @@ const electronAPI = {
         { name: 'JPEG Image', extensions: ['jpg'] },
         { name: 'JSON', extensions: ['json'] },
         { name: 'CSV', extensions: ['csv'] },
+        { name: 'All Files', extensions: ['*'] },
       ]
     }).then(async (savePath: string | null) => {
       if (savePath) {
