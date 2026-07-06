@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { statSync } from 'fs'
 import { registerAllIpc } from './ipc/index.ts'
 import { getStoreValue, setStoreValue } from './utils/store.ts'
+import { stopOllama } from './ollama-manager.ts'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -64,7 +65,7 @@ if (!gotLock) {
       height: bounds.height,
       minWidth: 800,
       minHeight: 600,
-      title: 'Cursus',
+      title: 'Cursus Beta',
       icon: join(__dirname, '../../build/icon.png'),
       show: false,
       webPreferences: {
@@ -165,6 +166,10 @@ if (!gotLock) {
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(template))
   }
+
+  app.on('before-quit', () => {
+    stopOllama()
+  })
 
   app.whenReady().then(() => {
     registerAllIpc()

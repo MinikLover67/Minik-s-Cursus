@@ -20,6 +20,10 @@ declare global {
       getStore: (key: string) => Promise<unknown>
       setStore: (key: string, value: unknown) => Promise<void>
       getVersion: () => Promise<string>
+      startAiStream: (backend: string, model: string, prompt: string) => Promise<void>
+      cancelAiStream: () => Promise<void>
+      onAiToken: (callback: (token: string) => void) => () => void
+      onAiDone: (callback: () => void) => () => void
       onMenuEvent: (channel: string, callback: (...args: unknown[]) => void) => () => void
       onOpenFile: (callback: (filePath: string) => void) => () => void
     }

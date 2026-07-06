@@ -5,6 +5,22 @@ export function setupAiSettings(editor: CursusEditor): void {
   const saveBtn = document.getElementById('btn-ai-save')
   const cancelBtn = document.getElementById('btn-ai-cancel')
   const backendSelect = document.getElementById('ai-backend-select') as HTMLSelectElement
+  const acToggle = document.getElementById('ai-autocomplete-toggle') as HTMLInputElement
+
+  overlay?.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.add('hidden')
+  })
+
+  window.electronAPI.getStore('aiAutocomplete').then((enabled: unknown) => {
+    if (acToggle) {
+      acToggle.checked = (enabled as boolean) !== false
+      if (editor.autocomplete) editor.autocomplete.setEnabled(acToggle.checked)
+    }
+  })
+
+  acToggle?.addEventListener('change', () => {
+    if (editor.autocomplete) editor.autocomplete.setEnabled(acToggle.checked)
+  })
 
   backendSelect?.addEventListener('change', () => {
     document.getElementById('ollama-settings')?.classList.toggle('hidden', backendSelect.value !== 'ollama')
@@ -64,6 +80,7 @@ export function setupAiSettings(editor: CursusEditor): void {
   saveBtn?.addEventListener('click', async () => {
     const backend = backendSelect?.value
     await window.electronAPI.setStore('aiBackend', backend)
+    await window.electronAPI.setStore('aiAutocomplete', acToggle?.checked ?? true)
 
     if (backend === 'ollama') {
       await window.electronAPI.setStore('ollamaBaseUrl', (document.getElementById('ollama-url') as HTMLInputElement)?.value || 'http://localhost:11434')

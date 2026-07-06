@@ -4,6 +4,7 @@ import { setupWelcomeGuide } from './WelcomeGuide.ts'
 import { setupAiSettings } from './AiSettings.ts'
 import { updateStatusBar, setupStatusBar } from './StatusBar.ts'
 import { setupSidebar, updateRecentDisplay, openFileInEditor, showEditor, updateHomeRecentList } from './Sidebar.ts'
+import { setupSelectionMenu } from './SelectionMenu.ts'
 
 const fmtMap: Record<string, string> = {
   md: 'markdown', html: 'html', htm: 'html', txt: 'text', docx: 'docx',
@@ -47,6 +48,7 @@ export function initUI(editor: CursusEditor): void {
   setupSidebar(editor)
   setupMenuListeners(editor)
   setupDragAndDrop(editor)
+  setupSelectionMenu(editor)
 
   document.getElementById('home-new')?.addEventListener('click', async () => {
     editor.clear()
@@ -181,7 +183,13 @@ function setupMenuListeners(editor: CursusEditor): void {
 
   api.onMenuEvent('menu:about', async () => {
     const version = await api.getVersion()
-    window.alert(`Cursus v${version}\n\nAI-powered rich text editor for students and teachers.\n\nMIT License`)
+    window.alert(`Cursus v${version} (Beta)
+AI-powered rich text editor for students and teachers.
+
+This is a development preview. Some features may be incomplete.
+Bugs and issues are being actively fixed.
+
+MIT License`)
   })
 }
 

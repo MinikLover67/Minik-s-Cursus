@@ -79,6 +79,33 @@ const electronAPI = {
   getVersion: () =>
     ipcRenderer.invoke('app:get-version'),
 
+  startAiStream: (backend: string, model: string, prompt: string) =>
+    ipcRenderer.invoke('ai:start-stream', { backend, model, prompt }),
+
+  ensureOllama: () =>
+    ipcRenderer.invoke('ai:ensure-ollama'),
+
+  findOllama: () =>
+    ipcRenderer.invoke('ai:find-ollama'),
+
+  stopOllama: () =>
+    ipcRenderer.invoke('ai:stop-ollama'),
+
+  cancelAiStream: () =>
+    ipcRenderer.invoke('ai:cancel-stream'),
+
+  onAiToken: (callback: (token: string) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, token: string) => callback(token)
+    ipcRenderer.on('ai:stream-token', handler)
+    return () => ipcRenderer.removeListener('ai:stream-token', handler)
+  },
+
+  onAiDone: (callback: () => void) => {
+    const handler = () => callback()
+    ipcRenderer.on('ai:stream-done', handler)
+    return () => ipcRenderer.removeListener('ai:stream-done', handler)
+  },
+
   onMenuEvent: (channel: string, callback: (...args: unknown[]) => void) => {
     const handler = (_event: Electron.IpcRendererEvent, ...args: unknown[]) => callback(...args)
     ipcRenderer.on(channel, handler)

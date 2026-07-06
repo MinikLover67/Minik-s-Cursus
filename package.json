@@ -1,6 +1,6 @@
 {
   "name": "cursus",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.1",
   "description": "AI-powered rich text editor for students and teachers",
   "main": "dist/main/index.js",
   "author": "Minik",

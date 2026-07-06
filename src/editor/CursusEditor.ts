@@ -22,6 +22,7 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { common, createLowlight } from 'lowlight'
 import { Toolbar } from './toolbar/Toolbar.ts'
 import { SlashCommandsExtension } from './slash-commands/SlashCommands.ts'
+import { GhostText, AutocompleteKeymap, AiAutocomplete } from './extensions/AiAutocomplete.ts'
 
 const lowlight = createLowlight(common)
 
@@ -73,6 +74,8 @@ export class CursusEditor {
         TableHeader,
         CodeBlockLowlight.configure({ lowlight }),
         SlashCommandsExtension,
+        GhostText,
+        AutocompleteKeymap,
       ],
       content: '<p></p>',
       editorProps: {
@@ -91,7 +94,10 @@ export class CursusEditor {
     })
 
     new Toolbar(this)
+    this.autocomplete = new AiAutocomplete(this.editor)
   }
+
+  autocomplete: AiAutocomplete | null = null
 
   setContent(content: string): void {
     this.editor.commands.setContent(content)

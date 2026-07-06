@@ -17,7 +17,7 @@
       <div class="home-header">
         <div class="home-logo">C</div>
         <h1>Cursus</h1>
-        <p class="home-tagline">AI-Powered Rich Text Editor</p>
+        <p class="home-tagline">AI-Powered Rich Text Editor — Beta</p>
       </div>
       <div class="home-cards">
         <div class="home-card" id="home-new">
@@ -165,6 +165,13 @@
             <option value="llamacpp">llama.cpp (Embedded)</option>
             <option value="custom">Custom API</option>
           </select>
+        </div>
+        <div class="ai-setting-group">
+          <label>Real-time Autocomplete</label>
+          <label class="toggle-label">
+            <input type="checkbox" id="ai-autocomplete-toggle" checked>
+            <span>Show AI suggestions as you type (Tab to accept, Esc to dismiss)</span>
+          </label>
         </div>
         <div id="ollama-settings" class="ai-setting-group">
           <label>Ollama URL</label>
