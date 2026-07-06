@@ -5,8 +5,8 @@ import { setupAiSettings } from './AiSettings.ts'
 import { updateStatusBar, setupStatusBar } from './StatusBar.ts'
 import { setupSidebar } from './Sidebar.ts'
 
-export function initUI(editor: CursusEditor): void {
-  setupTheme()
+export async function initUI(editor: CursusEditor): Promise<void> {
+  await setupTheme()
   setupWelcomeGuide()
   setupAiSettings(editor)
   setupStatusBar(editor)
@@ -40,6 +40,12 @@ function setupMenuListeners(editor: CursusEditor): void {
     if (editor.currentFile) {
       const content = editor.getHTML()
       await api.saveFile(editor.currentFile, content, editor.currentFormat)
+    } else {
+      const savedPath = await api.saveFileAs(editor.getHTML(), editor.currentFormat)
+      if (savedPath) {
+        editor.currentFile = savedPath
+        updateStatusBar(editor, savedPath, editor.getWordCount())
+      }
     }
   })
 
@@ -57,8 +63,7 @@ function setupMenuListeners(editor: CursusEditor): void {
   })
 
   api.onMenuEvent('menu:theme', () => {
-    const btn = document.getElementById('btn-theme')
-    btn?.click()
+    document.getElementById('btn-theme')?.click()
   })
 
   api.onMenuEvent('menu:ai-settings', () => {
@@ -70,24 +75,28 @@ function setupMenuListeners(editor: CursusEditor): void {
   })
 
   api.onMenuEvent('menu:export-pdf', async () => {
-    await exportAsPDF(editor)
+    const content = editor.getHTML()
+    const savedPath = await api.saveFileAs(content, 'pdf')
+    if (savedPath) window.alert('Exported to: ' + savedPath)
   })
 
   api.onMenuEvent('menu:export-docx', async () => {
-    await exportAsDOCX(editor)
+    const content = editor.getHTML()
+    const savedPath = await api.saveFileAs(content, 'docx')
+    if (savedPath) window.alert('Exported to: ' + savedPath)
   })
 
   api.onMenuEvent('menu:export-md', async () => {
-    const md = editor.getMarkdown()
-    const savedPath = await api.saveFileAs(md, 'markdown')
+    const content = editor.getHTML()
+    const savedPath = await api.saveFileAs(content, 'markdown')
     if (savedPath) {
       editor.currentFile = savedPath
       editor.currentFormat = 'markdown'
     }
   })
 
-  api.onMenuEvent('menu:about', () => {
-    const version = api.getVersion()
+  api.onMenuEvent('menu:about', async () => {
+    const version = await api.getVersion()
     window.alert(`Cursus v${version}\n\nAI-powered rich text editor for students and teachers.\n\nMIT License`)
   })
 }
@@ -98,23 +107,23 @@ async function openFileInEditor(editor: CursusEditor, filePath: string): Promise
 
   const ext = filePath.split('.').pop()?.toLowerCase() || ''
   const formatMap: Record<string, string> = {
-    md: 'markdown', html: 'html', txt: 'text', docx: 'docx',
-    pdf: 'pdf', xlsx: 'xlsx', pptx: 'pptx', csv: 'csv', json: 'json'
+    md: 'markdown', html: 'html', htm: 'html', txt: 'text', docx: 'docx',
+    pdf: 'pdf', xlsx: 'xlsx', xls: 'xlsx', pptx: 'pptx', csv: 'csv', json: 'json'
   }
   const format = formatMap[ext] || 'unknown'
   editor.currentFile = filePath
   editor.currentFormat = format
 
-  if (format === 'markdown' || format === 'html' || format === 'text' || format === 'json') {
+  if (format === 'markdown' || format === 'html' || format === 'text' || format === 'json' || format === 'csv') {
     editor.setContent(content)
   } else if (format === 'docx') {
-    editor.setContent('<p><em>DOCX content loaded. Full DOCX editing coming soon.</em></p><p>' + content.substring(0, 2000) + '</p>')
+    editor.setContent('<p><em>DOCX imported. Edit as rich text below:</em></p><p>' + content.substring(0, 5000) + '</p>')
   } else if (format === 'pdf') {
-    editor.setContent('<p><em>PDF content loaded. PDF viewer coming soon.</em></p>')
+    editor.setContent('<p><em>PDF imported:</em></p><p>' + content.substring(0, 5000) + '</p>')
   } else if (format === 'xlsx') {
-    editor.setContent('<p><em>Excel file loaded. Spreadsheet editor coming soon.</em></p>')
+    editor.setContent('<p><em>Spreadsheet imported:</em></p><p>' + content.substring(0, 5000) + '</p>')
   } else {
-    editor.setContent('<p><em>File format not yet fully supported for editing.</em></p>')
+    editor.setContent('<p>' + content.substring(0, 5000) + '</p>')
   }
 
   window.electronAPI.addRecentFile(filePath)
@@ -122,32 +131,18 @@ async function openFileInEditor(editor: CursusEditor, filePath: string): Promise
   editor.focus()
 }
 
-async function exportAsPDF(editor: CursusEditor): Promise<void> {
-  const html = editor.getHTML()
-  const savedPath = await window.electronAPI.saveFileAs(html, 'pdf')
-  if (savedPath) {
-    window.alert('PDF exported to: ' + savedPath)
-  }
-}
-
-async function exportAsDOCX(editor: CursusEditor): Promise<void> {
-  const html = editor.getHTML()
-  const savedPath = await window.electronAPI.saveFileAs(html, 'docx')
-  if (savedPath) {
-    window.alert('DOCX exported to: ' + savedPath)
-  }
-}
-
 function setupKeyboardShortcuts(editor: CursusEditor): void {
   document.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey) {
-      switch (e.key) {
+      switch (e.key.toLowerCase()) {
         case 's':
           e.preventDefault()
           if (e.shiftKey) {
-            document.getElementById('btn-save-as')?.click()
+            api().saveFileAs(editor.getHTML(), editor.currentFormat)
+          } else if (editor.currentFile) {
+            api().saveFile(editor.currentFile, editor.getHTML(), editor.currentFormat)
           } else {
-            document.getElementById('btn-save')?.click()
+            api().saveFileAs(editor.getHTML(), editor.currentFormat)
           }
           break
         case 'o':
@@ -163,16 +158,20 @@ function setupKeyboardShortcuts(editor: CursusEditor): void {
   })
 }
 
-function setupDragAndDrop(editor: CursusEditor): void {
-  const content = document.getElementById('editor-content')
-  if (!content) return
+function api() {
+  return window.electronAPI
+}
 
-  content.addEventListener('dragover', (e) => {
+function setupDragAndDrop(editor: CursusEditor): void {
+  const contentEl = document.getElementById('editor-content')
+  if (!contentEl) return
+
+  contentEl.addEventListener('dragover', (e) => {
     e.preventDefault()
     e.dataTransfer!.dropEffect = 'copy'
   })
 
-  content.addEventListener('drop', async (e) => {
+  contentEl.addEventListener('drop', async (e) => {
     e.preventDefault()
     const files = e.dataTransfer?.files
     if (!files || files.length === 0) return

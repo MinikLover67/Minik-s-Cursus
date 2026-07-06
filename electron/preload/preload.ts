@@ -1,7 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 const electronAPI = {
-  // File operations
   openFile: (filters?: { name: string; extensions: string[] }[]) =>
     ipcRenderer.invoke('dialog:open-file', { filters }),
 
@@ -36,7 +35,6 @@ const electronAPI = {
   openDirectory: () =>
     ipcRenderer.invoke('dialog:open-directory'),
 
-  // AI operations
   checkOllama: (baseUrl?: string) =>
     ipcRenderer.invoke('ai:check-ollama', baseUrl),
 
@@ -49,7 +47,6 @@ const electronAPI = {
   ollamaGenerate: (model: string, prompt: string, baseUrl?: string) =>
     ipcRenderer.invoke('ai:ollama-generate', { model, prompt, baseUrl }),
 
-  // App operations
   getStore: (key: string) =>
     ipcRenderer.invoke('app:get-store', { key }),
 
@@ -59,7 +56,6 @@ const electronAPI = {
   getVersion: () =>
     ipcRenderer.invoke('app:get-version'),
 
-  // Menu event listeners
   onMenuEvent: (channel: string, callback: (...args: unknown[]) => void) => {
     const handler = (_event: Electron.IpcRendererEvent, ...args: unknown[]) => callback(...args)
     ipcRenderer.on(channel, handler)

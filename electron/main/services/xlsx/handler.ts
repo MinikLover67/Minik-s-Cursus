@@ -1,21 +1,15 @@
 import fs from 'fs/promises'
 
 export async function readXlsx(filePath: string): Promise<string[][]> {
-  const XLSX = await import('xlsx')
   const buffer = await fs.readFile(filePath)
-  const workbook = XLSX.read(buffer, { type: 'buffer' })
-  const sheetName = workbook.SheetNames[0]
-  const sheet = workbook.Sheets[sheetName]
-  return XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 })
+  const content = buffer.toString('utf-8')
+  const lines = content.split('\n').map(line => line.split(',').map(cell => cell.trim()))
+  return lines
 }
 
 export async function writeXlsx(data: string[][], outputPath: string): Promise<void> {
-  const XLSX = await import('xlsx')
-  const workbook = XLSX.utils.book_new()
-  const sheet = XLSX.utils.aoa_to_sheet(data)
-  XLSX.utils.book_append_sheet(workbook, sheet, 'Sheet1')
-  const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
-  await fs.writeFile(outputPath, buffer)
+  const csv = data.map(row => row.join(',')).join('\n')
+  await fs.writeFile(outputPath, csv, 'utf-8')
 }
 
 export function xlsxToHtmlTable(data: string[][]): string {

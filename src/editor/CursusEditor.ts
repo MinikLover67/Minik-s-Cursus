@@ -22,7 +22,6 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Gapcursor from '@tiptap/extension-gapcursor'
 import { common, createLowlight } from 'lowlight'
 import { buildToolbar } from './toolbar/Toolbar.ts'
-import { Markdown } from './extensions/Markdown.ts'
 
 const lowlight = createLowlight(common)
 
@@ -33,15 +32,20 @@ export interface EditorCallbacks {
 
 export class CursusEditor {
   editor: Editor
-  private callbacks: EditorCallbacks
+  callbacks: EditorCallbacks
   currentFile: string | null = null
   currentFormat: string = 'markdown'
 
   constructor(selector: string, callbacks: EditorCallbacks = {}) {
     this.callbacks = callbacks
 
+    const element = document.querySelector(selector)
+    if (!element) {
+      throw new Error(`Editor element not found: ${selector}`)
+    }
+
     this.editor = new Editor({
-      element: document.querySelector(selector) || undefined,
+      element,
       extensions: [
         StarterKit.configure({
           codeBlock: false,
@@ -68,8 +72,7 @@ export class CursusEditor {
         TableCell,
         TableHeader,
         CodeBlockLowlight.configure({ lowlight }),
-        Gapcursor,
-        Markdown
+        Gapcursor
       ],
       content: '<p></p>',
       editorProps: {
@@ -107,7 +110,30 @@ export class CursusEditor {
   }
 
   getMarkdown(): string {
-    return this.editor.storage.markdown?.getMarkdown?.() || this.editor.getText()
+    const html = this.getHTML()
+    let md = html
+    md = md.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n')
+    md = md.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n')
+    md = md.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n\n')
+    md = md.replace(/<h4[^>]*>(.*?)<\/h4>/gi, '#### $1\n\n')
+    md = md.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**')
+    md = md.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**')
+    md = md.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*')
+    md = md.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*')
+    md = md.replace(/<u[^>]*>(.*?)<\/u>/gi, '__$1__')
+    md = md.replace(/<s[^>]*>(.*?)<\/s>/gi, '~~$1~~')
+    md = md.replace(/<code[^>]*>(.*?)<\/code>/gi, '`$1`')
+    md = md.replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)')
+    md = md.replace(/<br\s*\/?>/gi, '\n')
+    md = md.replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n')
+    md = md.replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n')
+    md = md.replace(/<[^>]+>/g, '')
+    md = md.replace(/&amp;/g, '&')
+    md = md.replace(/&lt;/g, '<')
+    md = md.replace(/&gt;/g, '>')
+    md = md.replace(/&nbsp;/g, ' ')
+    md = md.replace(/\n{3,}/g, '\n\n')
+    return md.trim()
   }
 
   setMarkdown(content: string): void {

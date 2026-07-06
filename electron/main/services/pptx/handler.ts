@@ -1,8 +1,8 @@
 import fs from 'fs/promises'
 
 export async function createPptx(slides: { title: string; content: string }[], outputPath: string): Promise<void> {
-  const pptxgen = (await import('pptxgenjs')).default
-  const pptx = new pptxgen()
+  const PptxGenJS = (await import('pptxgenjs')).default
+  const pptx = new PptxGenJS()
 
   for (const slide of slides) {
     const p = pptx.addSlide()

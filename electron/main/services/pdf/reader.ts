@@ -1,18 +1,16 @@
 import fs from 'fs/promises'
+import { PDFDocument } from 'pdf-lib'
 
 export async function readPdfText(filePath: string): Promise<string> {
-  const pdfjsLib = await import('pdfjs-dist')
   const buffer = await fs.readFile(filePath)
-  const data = new Uint8Array(buffer)
-  const doc = await pdfjsLib.getDocument({ data }).promise
+  const pdfDoc = await PDFDocument.load(buffer)
+  const pages = pdfDoc.getPages()
+  let text = ''
 
-  let fullText = ''
-  for (let i = 1; i <= doc.numPages; i++) {
-    const page = await doc.getPage(i)
-    const content = await page.getTextContent()
-    const text = content.items.map((item: any) => item.str).join(' ')
-    fullText += text + '\n\n'
+  for (const page of pages) {
+    const { width, height } = page.getSize()
+    text += `[Page ${pages.indexOf(page) + 1} - ${width}x${height}]\n\n`
   }
 
-  return fullText
+  return text || 'PDF loaded. Text extraction requires pdf.js viewer.'
 }

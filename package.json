@@ -11,7 +11,7 @@
     "dev:main": "esbuild electron/main/index.ts --outfile=dist/main/index.js --platform=node --format=esm --external:electron --external:node-llama-cpp --external:node:* --watch",
     "dev:renderer": "vite serve src --config vite.renderer.config.ts",
     "build": "npm run build:main && npm run build:preload && npm run build:renderer",
-    "build:main": "esbuild electron/main/index.ts --bundle --outfile=dist/main/index.js --platform=node --format=esm --external:electron --external:node-llama-cpp --external:electron-store --external:node:*",
+    "build:main": "esbuild electron/main/index.ts --bundle --outfile=dist/main/index.js --platform=node --format=esm --external:electron --external:node:fs --external:node:path --external:node:url --external:node:crypto --external:node:os --external:node:child_process --external:node:http --external:node:https --external:node:stream --external:node:buffer --external:node:util --external:node:events --external:node:net --external:node:tls --external:node:zlib --external:node:assert --external:node:process",
     "build:preload": "esbuild electron/preload/preload.ts --bundle --outfile=dist/preload/preload.js --platform=node --format=cjs --external:electron",
     "build:renderer": "vite build --config vite.renderer.config.ts",
     "package": "npm run build && electron-builder",
@@ -32,6 +32,7 @@
     "@tiptap/extension-highlight": "^2.11.0",
     "@tiptap/extension-image": "^2.11.0",
     "@tiptap/extension-link": "^2.11.0",
+    "@tiptap/extension-list-keymap": "^2.11.0",
     "@tiptap/extension-mention": "^2.11.0",
     "@tiptap/extension-placeholder": "^2.11.0",
     "@tiptap/extension-subscript": "^2.11.0",
@@ -44,13 +45,12 @@
     "@tiptap/extension-task-list": "^2.11.0",
     "@tiptap/extension-text-align": "^2.11.0",
     "@tiptap/extension-text-style": "^2.11.0",
-    "@tiptap/extension-list-keymap": "^2.11.0",
     "@tiptap/extension-underline": "^2.11.0",
     "@tiptap/pm": "^2.11.0",
     "@tiptap/starter-kit": "^2.11.0",
     "@tiptap/suggestion": "^2.11.0",
-    "electron-store": "^6.0.1",
     "i18next": "^23.16.0",
+    "jszip": "^3.10.1",
     "lowlight": "^3.3.0",
     "mammoth": "^1.8.0",
     "pdf-lib": "^1.17.1",
@@ -85,7 +85,9 @@
       "target": [
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.ico"

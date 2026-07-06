@@ -17,12 +17,10 @@ export function setupStatusBar(editor: CursusEditor): void {
         : 'AI: Ollama not running'
       aiStatus.style.color = status.running ? 'var(--primary)' : 'var(--text-muted)'
     }
-  })
-
-  editor.callbacks = {
-    ...editor.callbacks,
-    onWordCountChange: (count) => {
-      updateStatusBar(editor, editor.currentFile || 'No file open', count)
+  }).catch(() => {
+    if (aiStatus) {
+      aiStatus.textContent = 'AI: unavailable'
+      aiStatus.style.color = 'var(--text-muted)'
     }
-  }
+  })
 }

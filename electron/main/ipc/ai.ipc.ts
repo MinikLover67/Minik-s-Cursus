@@ -2,8 +2,8 @@ import { ipcMain } from 'electron'
 import { getStoreValue } from '../utils/store.ts'
 
 export function registerAiIpc(): void {
-  ipcMain.handle('ai:check-ollama', async (_event, baseUrl?: string) => {
-    const url = baseUrl || getStoreValue('ollamaBaseUrl')
+  ipcMain.handle('ai:check-ollama', async (_event, options?) => {
+    const url = (typeof options === 'string' ? options : options?.baseUrl) || getStoreValue('ollamaBaseUrl')
     try {
       const res = await fetch(`${url}/api/tags`, { signal: AbortSignal.timeout(3000) })
       if (!res.ok) return { running: false, models: [] }
@@ -43,10 +43,11 @@ export function registerAiIpc(): void {
       body: JSON.stringify({
         model: options.model,
         prompt: options.prompt,
-        stream: true
+        stream: false
       })
     })
     if (!res.ok) throw new Error(`AI generation failed: ${res.statusText}`)
-    return { stream: res.body }
+    const data = await res.json() as { response?: string }
+    return { text: data.response || '' }
   })
 }
