@@ -360,7 +360,7 @@ The portable version does NOT register file associations (since it doesn't insta
 ### Setup
 ```bash
 # Clone the repository
-git clone https://github.com/MinikLover67/cursus.git
+git clone https://github.com/MinikLover67/Minik-s-Cursus.git
 cd cursus
 
 # Install dependencies
@@ -575,7 +575,7 @@ A: Yes. Type `#` for heading, `*` for bullet list, `>` for blockquote, `` ` `` f
 ### Troubleshooting
 
 **Q: The app doesn't start / buttons don't work**
-A: This was a known issue in early builds caused by the preload script format mismatch. Download the latest version from the [Releases](https://github.com/MinikLover67/cursus/releases) page. If the problem persists, run `npm run build` and check for errors.
+A: This was a known issue in early builds caused by the preload script format mismatch. Download the latest version from the [Releases](https://github.com/MinikLover67/Minik-s-Cursus/releases) page. If the problem persists, run `npm run build` and check for errors.
 
 **Q: "Failed to load preload script" error**
 A: This means the preload script format doesn't match the package.json module type. Make sure you're using a build that outputs `preload.cjs` (not `.js`). Run `npm run build:preload` to rebuild.
