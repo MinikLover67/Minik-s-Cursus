@@ -9,12 +9,11 @@ const electronAPI = {
 
   saveFileAs: (content: string, format: string, defaultName?: string) =>
     ipcRenderer.invoke('dialog:save-file', {
-      defaultName: defaultName || 'document',
+      defaultName: defaultName || 'untitled.md',
       filters: [
-        { name: 'All Supported Files', extensions: ['pdf', 'docx', 'md', 'html', 'txt', 'pptx', 'png', 'jpg', 'json', 'csv'] },
+        { name: 'Markdown', extensions: ['md'] },
         { name: 'PDF Document', extensions: ['pdf'] },
         { name: 'Word Document', extensions: ['docx'] },
-        { name: 'Markdown', extensions: ['md'] },
         { name: 'HTML', extensions: ['html'] },
         { name: 'Text File', extensions: ['txt'] },
         { name: 'PowerPoint', extensions: ['pptx'] },
