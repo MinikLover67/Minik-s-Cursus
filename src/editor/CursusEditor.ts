@@ -21,6 +21,7 @@ import TableHeader from '@tiptap/extension-table-header'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { common, createLowlight } from 'lowlight'
 import { Toolbar } from './toolbar/Toolbar.ts'
+import { SlashCommandsExtension } from './slash-commands/SlashCommands.ts'
 
 const lowlight = createLowlight(common)
 
@@ -71,6 +72,7 @@ export class CursusEditor {
         TableCell,
         TableHeader,
         CodeBlockLowlight.configure({ lowlight }),
+        SlashCommandsExtension,
       ],
       content: '<p></p>',
       editorProps: {

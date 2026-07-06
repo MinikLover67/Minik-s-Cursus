@@ -5,7 +5,41 @@ import { setupAiSettings } from './AiSettings.ts'
 import { updateStatusBar, setupStatusBar } from './StatusBar.ts'
 import { setupSidebar, updateRecentDisplay, openFileInEditor, showEditor, updateHomeRecentList } from './Sidebar.ts'
 
+const fmtMap: Record<string, string> = {
+  md: 'markdown', html: 'html', htm: 'html', txt: 'text', docx: 'docx',
+  pdf: 'pdf', xlsx: 'xlsx', xls: 'xlsx', pptx: 'pptx', csv: 'csv', json: 'json',
+  png: 'png', jpg: 'jpg', jpeg: 'jpg'
+}
+
+function detectFormat(p: string): string {
+  const ext = p.split('.').pop()?.toLowerCase() || ''
+  return fmtMap[ext] || ext
+}
+
+let isDirty = false
+let autoSaveTimer: ReturnType<typeof setInterval> | null = null
+
+function resetDirty(): void { isDirty = false }
+
+function startAutoSave(editor: CursusEditor): void {
+  if (autoSaveTimer) clearInterval(autoSaveTimer)
+  autoSaveTimer = setInterval(async () => {
+    if (isDirty && editor.currentFile) {
+      await window.electronAPI.saveFile(editor.currentFile, editor.getHTML(), editor.currentFormat)
+      isDirty = false
+    }
+  }, 30000)
+}
+
 export function initUI(editor: CursusEditor): void {
+  isDirty = false
+  autoSaveTimer = null
+
+  editor.callbacks = {
+    ...editor.callbacks,
+    onChange: () => { isDirty = true }
+  }
+
   setupTheme()
   setupWelcomeGuide()
   setupAiSettings(editor)
@@ -18,6 +52,7 @@ export function initUI(editor: CursusEditor): void {
     editor.clear()
     editor.currentFile = null
     editor.currentFormat = 'markdown'
+    resetDirty()
     updateStatusBar(editor, 'No file open', 0)
     showEditor(editor)
   })
@@ -29,6 +64,7 @@ export function initUI(editor: CursusEditor): void {
     ])
     if (filePath) {
       await openFileInEditor(editor, filePath)
+      startAutoSave(editor)
     }
   })
 
@@ -46,6 +82,7 @@ export function initUI(editor: CursusEditor): void {
 
   window.electronAPI.onOpenFile(async (filePath: string) => {
     await openFileInEditor(editor, filePath)
+    startAutoSave(editor)
   })
 
   updateHomeRecentList(editor)
@@ -58,6 +95,8 @@ function setupMenuListeners(editor: CursusEditor): void {
     editor.clear()
     editor.currentFile = null
     editor.currentFormat = 'markdown'
+    resetDirty()
+    if (autoSaveTimer) { clearInterval(autoSaveTimer); autoSaveTimer = null }
     updateStatusBar(editor, 'No file open', 0)
     showEditor(editor)
   })
@@ -69,15 +108,20 @@ function setupMenuListeners(editor: CursusEditor): void {
     ])
     if (!filePath) return
     await openFileInEditor(editor, filePath)
+    startAutoSave(editor)
   })
 
   api.onMenuEvent('menu:save', async () => {
     if (editor.currentFile) {
       await api.saveFile(editor.currentFile, editor.getHTML(), editor.currentFormat)
+      resetDirty()
     } else {
       const savedPath = await api.saveFileAs(editor.getHTML(), editor.currentFormat)
       if (savedPath) {
         editor.currentFile = savedPath
+        editor.currentFormat = detectFormat(savedPath)
+        resetDirty()
+        startAutoSave(editor)
         updateStatusBar(editor, savedPath, editor.getWordCount())
         updateRecentDisplay(editor)
       }
@@ -88,6 +132,9 @@ function setupMenuListeners(editor: CursusEditor): void {
     const savedPath = await api.saveFileAs(editor.getHTML(), editor.currentFormat)
     if (savedPath) {
       editor.currentFile = savedPath
+      editor.currentFormat = detectFormat(savedPath)
+      resetDirty()
+      startAutoSave(editor)
       updateStatusBar(editor, savedPath, editor.getWordCount())
       updateRecentDisplay(editor)
     }
@@ -127,7 +174,8 @@ function setupMenuListeners(editor: CursusEditor): void {
     const savedPath = await api.saveFileAs(editor.getHTML(), 'markdown')
     if (savedPath) {
       editor.currentFile = savedPath
-      editor.currentFormat = 'markdown'
+      editor.currentFormat = detectFormat(savedPath)
+      startAutoSave(editor)
     }
   })
 

@@ -8,14 +8,27 @@ const electronAPI = {
     ipcRenderer.invoke('file:save', { path, content, format }),
 
   saveFileAs: (content: string, format: string, defaultName?: string) =>
-    ipcRenderer.invoke('dialog:save-file', { defaultName, filters: [{ name: format.toUpperCase(), extensions: [format] }] })
-      .then(async (savePath: string | null) => {
-        if (savePath) {
-          await ipcRenderer.invoke('file:write', { path: savePath, content })
-          return savePath
-        }
-        return null
-      }),
+    ipcRenderer.invoke('dialog:save-file', {
+      defaultName,
+      filters: [
+        { name: 'PDF Document', extensions: ['pdf'] },
+        { name: 'Word Document', extensions: ['docx'] },
+        { name: 'Markdown', extensions: ['md'] },
+        { name: 'HTML', extensions: ['html'] },
+        { name: 'Text File', extensions: ['txt'] },
+        { name: 'PowerPoint', extensions: ['pptx'] },
+        { name: 'PNG Image', extensions: ['png'] },
+        { name: 'JPEG Image', extensions: ['jpg'] },
+        { name: 'JSON', extensions: ['json'] },
+        { name: 'CSV', extensions: ['csv'] },
+      ]
+    }).then(async (savePath: string | null) => {
+      if (savePath) {
+        await ipcRenderer.invoke('file:write', { path: savePath, content })
+        return savePath
+      }
+      return null
+    }),
 
   readFile: (path: string) =>
     ipcRenderer.invoke('file:read', path),
