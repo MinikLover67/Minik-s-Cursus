@@ -47,6 +47,15 @@ const electronAPI = {
   ollamaGenerate: (model: string, prompt: string, baseUrl?: string) =>
     ipcRenderer.invoke('ai:ollama-generate', { model, prompt, baseUrl }),
 
+  checkLmStudio: (baseUrl?: string) =>
+    ipcRenderer.invoke('ai:check-lmstudio', baseUrl),
+
+  lmStudioModels: (baseUrl?: string) =>
+    ipcRenderer.invoke('ai:lmstudio-models', baseUrl),
+
+  lmStudioGenerate: (model: string, prompt: string, baseUrl?: string) =>
+    ipcRenderer.invoke('ai:lmstudio-generate', { model, prompt, baseUrl }),
+
   getStore: (key: string) =>
     ipcRenderer.invoke('app:get-store', { key }),
 
@@ -60,6 +69,12 @@ const electronAPI = {
     const handler = (_event: Electron.IpcRendererEvent, ...args: unknown[]) => callback(...args)
     ipcRenderer.on(channel, handler)
     return () => ipcRenderer.removeListener(channel, handler)
+  },
+
+  onOpenFile: (callback: (filePath: string) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, filePath: string) => callback(filePath)
+    ipcRenderer.on('open-file', handler)
+    return () => ipcRenderer.removeListener('open-file', handler)
   }
 }
 

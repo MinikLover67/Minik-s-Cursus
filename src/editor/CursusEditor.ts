@@ -19,9 +19,8 @@ import TableRow from '@tiptap/extension-table-row'
 import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import Gapcursor from '@tiptap/extension-gapcursor'
 import { common, createLowlight } from 'lowlight'
-import { buildToolbar } from './toolbar/Toolbar.ts'
+import { Toolbar } from './toolbar/Toolbar.ts'
 
 const lowlight = createLowlight(common)
 
@@ -72,7 +71,6 @@ export class CursusEditor {
         TableCell,
         TableHeader,
         CodeBlockLowlight.configure({ lowlight }),
-        Gapcursor
       ],
       content: '<p></p>',
       editorProps: {
@@ -90,7 +88,7 @@ export class CursusEditor {
       }
     })
 
-    buildToolbar(this)
+    new Toolbar(this)
   }
 
   setContent(content: string): void {

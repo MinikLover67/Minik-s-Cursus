@@ -13,11 +13,15 @@ declare global {
       checkOllama: (baseUrl?: string) => Promise<{ running: boolean; models: string[] }>
       ollamaModels: (baseUrl?: string) => Promise<string[]>
       ollamaPull: (model: string, baseUrl?: string) => Promise<void>
-      ollamaGenerate: (model: string, prompt: string, baseUrl?: string) => Promise<{ stream: ReadableStream | null }>
+      ollamaGenerate: (model: string, prompt: string, baseUrl?: string) => Promise<{ text: string }>
+      checkLmStudio: (baseUrl?: string) => Promise<{ running: boolean; models: string[] }>
+      lmStudioModels: (baseUrl?: string) => Promise<string[]>
+      lmStudioGenerate: (model: string, prompt: string, baseUrl?: string) => Promise<{ text: string }>
       getStore: (key: string) => Promise<unknown>
       setStore: (key: string, value: unknown) => Promise<void>
       getVersion: () => Promise<string>
       onMenuEvent: (channel: string, callback: (...args: unknown[]) => void) => () => void
+      onOpenFile: (callback: (filePath: string) => void) => () => void
     }
   }
 }

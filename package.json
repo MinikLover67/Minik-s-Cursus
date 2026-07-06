@@ -12,7 +12,7 @@
     "dev:renderer": "vite serve src --config vite.renderer.config.ts",
     "build": "npm run build:main && npm run build:preload && npm run build:renderer",
     "build:main": "esbuild electron/main/index.ts --bundle --outfile=dist/main/index.js --platform=node --format=esm --external:electron --external:node:fs --external:node:path --external:node:url --external:node:crypto --external:node:os --external:node:child_process --external:node:http --external:node:https --external:node:stream --external:node:buffer --external:node:util --external:node:events --external:node:net --external:node:tls --external:node:zlib --external:node:assert --external:node:process",
-    "build:preload": "esbuild electron/preload/preload.ts --bundle --outfile=dist/preload/preload.js --platform=node --format=cjs --external:electron",
+    "build:preload": "esbuild electron/preload/preload.ts --bundle --outfile=dist/preload/preload.cjs --platform=node --format=cjs --external:electron",
     "build:renderer": "vite build --config vite.renderer.config.ts",
     "package": "npm run build && electron-builder",
     "package:win": "npm run build && electron-builder --win",
@@ -81,13 +81,27 @@
     "asarUnpack": [
       "node_modules/node-llama-cpp/**"
     ],
+    "fileAssociations": [
+      { "ext": "pdf", "name": "PDF Document", "description": "Portable Document Format file" },
+      { "ext": "docx", "name": "Word Document", "description": "Microsoft Word document" },
+      { "ext": "md", "name": "Markdown Document", "description": "Markdown file" },
+      { "ext": "html", "name": "HTML Document", "description": "HTML file" },
+      { "ext": "htm", "name": "HTML Document", "description": "HTML file" },
+      { "ext": "txt", "name": "Text Document", "description": "Plain text file" },
+      { "ext": "xlsx", "name": "Excel Spreadsheet", "description": "Microsoft Excel spreadsheet" },
+      { "ext": "pptx", "name": "PowerPoint Presentation", "description": "Microsoft PowerPoint presentation" },
+      { "ext": "csv", "name": "CSV File", "description": "Comma-separated values file" },
+      { "ext": "json", "name": "JSON File", "description": "JSON data file" }
+    ],
     "win": {
       "target": [
         {
           "target": "portable",
-          "arch": [
-            "x64"
-          ]
+          "arch": ["x64"]
+        },
+        {
+          "target": "nsis",
+          "arch": ["x64"]
         }
       ],
       "icon": "build/icon.ico"
@@ -104,7 +118,10 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     },
     "portable": {
       "artifactName": "Cursus-${version}-portable.exe"

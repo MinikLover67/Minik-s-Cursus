@@ -11,10 +11,12 @@ interface StoreSchema {
   recentFiles: string[]
   windowBounds: { x: number; y: number; width: number; height: number }
   welcomeShown: boolean
-  aiBackend: 'ollama' | 'llamacpp' | 'custom'
+  aiBackend: 'ollama' | 'llamacpp' | 'custom' | 'lmstudio'
   ollamaBaseUrl: string
   ollamaModel: string
   llamacppModelPath: string
+  lmstudioBaseUrl: string
+  lmstudioModel: string
   customAiEndpoint: string
   customAiApiKey: string
   customAiModel: string
@@ -31,6 +33,8 @@ const defaults: StoreSchema = {
   ollamaBaseUrl: 'http://localhost:11434',
   ollamaModel: 'llama3.2:3b',
   llamacppModelPath: '',
+  lmstudioBaseUrl: 'http://localhost:1234',
+  lmstudioModel: '',
   customAiEndpoint: '',
   customAiApiKey: '',
   customAiModel: '',
