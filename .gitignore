@@ -10,3 +10,4 @@ Thumbs.db
 .vscode/
 .idea/
 _archived/
+electron_*.txt
