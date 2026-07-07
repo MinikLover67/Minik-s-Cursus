@@ -113,16 +113,6 @@ export class Toolbar {
       }
     }
 
-    const aiGroup = document.createElement('div')
-    aiGroup.className = 'toolbar-group'
-    const aiBtn = document.createElement('button')
-    aiBtn.id = 'btn-ai'
-    aiBtn.className = 'toolbar-btn'
-    aiBtn.title = 'AI Assistant'
-    aiBtn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c.5 2 2 3.5 4 4-2 .5-3.5 2-4 4-.5-2-2-3.5-4-4 2-.5 3.5-2 4-4z"/><path d="M19 10c.3 1.5 1.5 2.7 3 3-1.5.3-2.7 1.5-3 3-.3-1.5-1.5-2.7-3-3 1.5-.3 2.7-1.5 3-3z"/><path d="M5 14c-.5 1.5-2 3-3.5 3.5 1.5.5 3 2 3.5 3.5.5-1.5 2-3 3.5-3.5-1.5-.5-3-2-3.5-3.5z"/></svg>'
-    aiBtn.addEventListener('click', (e) => this.toggleAiPopup(e))
-    aiGroup.appendChild(aiBtn)
-    this.container.appendChild(aiGroup)
   }
 
   private showHeadingDropdown(): void {
@@ -164,100 +154,8 @@ export class Toolbar {
     setTimeout(() => document.addEventListener('click', this.closeHandler!), 0)
   }
 
-  private toggleAiPopup(e: MouseEvent): void {
-    e.stopPropagation()
-    if (this.currentPopup) { this.closePopup(); return }
-    const btn = e.currentTarget as HTMLElement
-    const rect = btn.getBoundingClientRect()
-    const popup = document.createElement('div')
-    popup.className = 'ai-popup'
-    popup.style.cssText = `position:fixed;top:${rect.bottom + 4}px;right:20px;width:320px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;padding:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;`
-    popup.innerHTML = `
-      <div style="font-weight:600;margin-bottom:8px;">AI Assistant</div>
-      <textarea id="ai-prompt-input" placeholder="Ask AI anything..." style="width:100%;height:80px;padding:8px;border:1px solid var(--border);border-radius:6px;resize:vertical;font-family:inherit;background:var(--bg-secondary);color:var(--text-primary);box-sizing:border-box;"></textarea>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
-        <select id="ai-model-select" style="flex:1;padding:6px;border:1px solid var(--border);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);font-size:0.85rem;"></select>
-        <button id="ai-generate-btn" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:4px;cursor:pointer;font-size:0.85rem;white-space:nowrap;">Generate</button>
-      </div>
-      <div id="ai-prompt-templates" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;"></div>
-      <div id="ai-result" style="margin-top:8px;max-height:200px;overflow-y:auto;padding:8px;background:var(--bg-secondary);border-radius:6px;display:none;white-space:pre-wrap;font-size:0.85rem;border:1px solid var(--border);"></div>
-    `
-    document.body.appendChild(popup)
-    this.currentPopup = popup
-    this.closeHandler = (ev: MouseEvent) => { if (!popup.contains(ev.target as Node) && ev.target !== btn) this.closePopup() }
-    setTimeout(() => document.addEventListener('click', this.closeHandler!), 0)
-    this.populateModels(popup)
-    this.addPromptTemplates(popup)
-    popup.querySelector('#ai-generate-btn')!.addEventListener('click', () => this.handleGenerate(popup))
-  }
-
   private closePopup(): void {
     if (this.closeHandler) { document.removeEventListener('click', this.closeHandler); this.closeHandler = null }
     this.currentPopup?.remove(); this.currentPopup = null
-  }
-
-  private async populateModels(popup: HTMLElement): Promise<void> {
-    const select = popup.querySelector('#ai-model-select') as HTMLSelectElement
-    try {
-      const backend = await window.electronAPI.getStore('aiBackend') as string
-      if (backend === 'lmstudio') {
-        const { running, models } = await window.electronAPI.checkLmStudio()
-        select.innerHTML = !running ? '<option>LM Studio not running</option>'
-          : models.length === 0 ? '<option>No models loaded</option>'
-          : models.map(m => `<option value="${m}">${m}</option>`).join('')
-      } else {
-        const { running, models } = await window.electronAPI.checkOllama()
-        select.innerHTML = !running ? '<option>Ollama not running</option>'
-          : models.length === 0 ? '<option>No models installed</option>'
-          : models.map(m => `<option value="${m}">${m}</option>`).join('')
-      }
-    } catch { select.innerHTML = '<option>Connection failed</option>' }
-  }
-
-  private addPromptTemplates(popup: HTMLElement): void {
-    const container = popup.querySelector('#ai-prompt-templates')!
-    const templates = [
-      { label: 'Fix Grammar', prompt: 'Fix grammar and spelling in the following text:' },
-      { label: 'Simplify', prompt: 'Simplify the following text:' },
-      { label: 'Summarize', prompt: 'Summarize the following text:' },
-      { label: 'Expand', prompt: 'Expand the following text with more detail:' },
-      { label: 'Improve', prompt: 'Improve the writing quality of the following text:' },
-      { label: 'Formal', prompt: 'Make the following text more formal:' }
-    ]
-    for (const t of templates) {
-      const btn = document.createElement('button')
-      btn.textContent = t.label
-      btn.style.cssText = 'padding:3px 8px;font-size:0.75rem;border:1px solid var(--border);border-radius:4px;background:var(--bg-secondary);color:var(--text-primary);cursor:pointer;'
-      btn.addEventListener('click', () => {
-        (popup.querySelector('#ai-prompt-input') as HTMLTextAreaElement).value = t.prompt + '\n\n'
-      })
-      container.appendChild(btn)
-    }
-  }
-
-  private async handleGenerate(popup: HTMLElement): Promise<void> {
-    const textarea = popup.querySelector('#ai-prompt-input') as HTMLTextAreaElement
-    const result = popup.querySelector('#ai-result') as HTMLElement
-    const generateBtn = popup.querySelector('#ai-generate-btn') as HTMLButtonElement
-    const modelSelect = popup.querySelector('#ai-model-select') as HTMLSelectElement
-    const prompt = textarea.value.trim()
-    if (!prompt) { result.style.display = 'block'; result.textContent = 'Please enter a prompt.'; return }
-    const model = modelSelect.value
-    if (!model || model.includes('not running') || model.includes('No models') || model.includes('failed')) {
-      result.style.display = 'block'; result.textContent = 'No AI model available. Start Ollama first.'; return
-    }
-    generateBtn.disabled = true; generateBtn.textContent = 'Generating...'
-    result.style.display = 'block'; result.textContent = 'Thinking...'
-    try {
-      const selection = this.editor.editor.state.doc.textBetween(this.editor.editor.state.selection.from, this.editor.editor.state.selection.to)
-      const fullPrompt = selection ? prompt + '\n\nSelected text:\n' + selection : prompt
-      const backend = await window.electronAPI.getStore('aiBackend') as string
-      const response = backend === 'lmstudio'
-        ? await window.electronAPI.lmStudioGenerate(model, fullPrompt)
-        : await window.electronAPI.ollamaGenerate(model, fullPrompt)
-      result.textContent = response.text
-      if (selection && response.text) this.editor.editor.chain().focus().deleteSelection().insertContent(response.text).run()
-    } catch (err) { result.textContent = 'Error: ' + (err instanceof Error ? err.message : String(err))
-    } finally { generateBtn.disabled = false; generateBtn.textContent = 'Generate' }
   }
 }

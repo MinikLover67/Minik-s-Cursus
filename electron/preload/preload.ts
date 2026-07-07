@@ -79,17 +79,8 @@ const electronAPI = {
   getVersion: () =>
     ipcRenderer.invoke('app:get-version'),
 
-  startAiStream: (backend: string, model: string, prompt: string) =>
-    ipcRenderer.invoke('ai:start-stream', { backend, model, prompt }),
-
-  ensureOllama: () =>
-    ipcRenderer.invoke('ai:ensure-ollama'),
-
-  findOllama: () =>
-    ipcRenderer.invoke('ai:find-ollama'),
-
-  stopOllama: () =>
-    ipcRenderer.invoke('ai:stop-ollama'),
+  checkUpdate: () =>
+    ipcRenderer.invoke('app:check-update'),
 
   cancelAiStream: () =>
     ipcRenderer.invoke('ai:cancel-stream'),

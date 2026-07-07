@@ -6,6 +6,7 @@
 
 :root {
   --sidebar-width: 240px;
+  --loading-duration: 2.2s;
   --toolbar-height: 44px;
   --statusbar-height: 32px;
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -409,6 +410,92 @@ kbd {
   align-items: center;
   gap: 6px;
   cursor: pointer;
+}
+
+/* Loading Screen */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+.loading-screen.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.loading-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: load-logo-pulse var(--loading-duration) ease-in-out infinite;
+}
+
+@keyframes load-logo-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--primary-rgb, 99,102,241), 0.3); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(var(--primary-rgb, 99,102,241), 0); }
+}
+
+.loading-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  animation: load-fade-in 0.6s ease 0.2s both;
+}
+
+.loading-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  animation: load-fade-in 0.6s ease 0.4s both;
+}
+
+.loading-bar {
+  width: 180px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+  margin-top: 8px;
+  animation: load-fade-in 0.6s ease 0.6s both;
+}
+
+.loading-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--primary);
+  border-radius: 2px;
+  animation: load-bar-grow var(--loading-duration) ease-in-out forwards;
+}
+
+@keyframes load-bar-grow {
+  0% { width: 0%; }
+  30% { width: 25%; }
+  60% { width: 55%; }
+  85% { width: 80%; }
+  100% { width: 100%; }
+}
+
+@keyframes load-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Scrollbar */

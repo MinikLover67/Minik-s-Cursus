@@ -30,6 +30,43 @@ function startAutoSave(editor: CursusEditor): void {
   }, 30000)
 }
 
+function initLoadingScreen(): void {
+  const loading = document.getElementById('loading-screen')
+  if (!loading) return
+  const duration = 2600
+  setTimeout(() => {
+    loading.classList.add('fade-out')
+    setTimeout(async () => {
+      loading.style.display = 'none'
+      const shown = await window.electronAPI.getStore('welcomeShown') as boolean
+      if (!shown) {
+        document.getElementById('welcome-overlay')?.classList.remove('hidden')
+      }
+    }, 600)
+  }, duration)
+}
+
+async function handleCheckUpdate(): Promise<void> {
+  const btn = document.getElementById('home-check-update')
+  if (btn) {
+    btn.textContent = 'Checking…'
+    ;(btn as HTMLButtonElement).disabled = true
+  }
+  const result = await window.electronAPI.checkUpdate()
+  if (btn) {
+    const orig = btn.querySelector('svg')?.outerHTML || ''
+    btn.innerHTML = orig + ' Check for Updates'
+    ;(btn as HTMLButtonElement).disabled = false
+  }
+  if (result.available) {
+    window.alert(`A new version is available!\n\nCurrent: ${result.current}\nLatest:  ${result.version}\n\nDownload: ${result.url}`)
+  } else if (result.error) {
+    window.alert(`Could not check for updates:\n${result.error}`)
+  } else {
+    window.alert(`You are up to date!\n\nCurrent version: ${result.current}`)
+  }
+}
+
 export function initUI(editor: CursusEditor): void {
   isDirty = false
   autoSaveTimer = null
@@ -39,6 +76,7 @@ export function initUI(editor: CursusEditor): void {
     onChange: () => { isDirty = true }
   }
 
+  initLoadingScreen()
   setupTheme()
   setupWelcomeGuide()
   setupStatusBar(editor)
@@ -69,6 +107,8 @@ export function initUI(editor: CursusEditor): void {
   document.getElementById('home-guide')?.addEventListener('click', () => {
     document.getElementById('welcome-overlay')?.classList.remove('hidden')
   })
+
+  document.getElementById('home-check-update')?.addEventListener('click', handleCheckUpdate)
 
   document.getElementById('home-theme')?.addEventListener('click', () => {
     document.getElementById('btn-theme')?.click()
