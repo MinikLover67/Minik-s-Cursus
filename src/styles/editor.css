@@ -177,14 +177,4 @@
   font-weight: 500;
 }
 
-/* AI autocomplete ghost text */
-.ai-ghost {
-  opacity: 0.4;
-  pointer-events: none;
-  animation: ai-ghost-fadein 0.15s ease-out;
-}
 
-@keyframes ai-ghost-fadein {
-  from { opacity: 0; }
-  to { opacity: 0.4; }
-}

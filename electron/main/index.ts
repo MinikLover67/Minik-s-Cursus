@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url'
 import { statSync } from 'fs'
 import { registerAllIpc } from './ipc/index.ts'
 import { getStoreValue, setStoreValue } from './utils/store.ts'
-import { stopOllama } from './ollama-manager.ts'
+
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -145,17 +145,6 @@ if (!gotLock) {
         ]
       },
       {
-        label: 'AI',
-        submenu: [
-          { label: 'AI Settings...', accelerator: 'CmdOrCtrl+,', click: () => mainWindow?.webContents.send('menu:ai-settings') },
-          { type: 'separator' },
-          { label: 'Continue Writing', click: () => mainWindow?.webContents.send('menu:ai-continue') },
-          { label: 'Improve', click: () => mainWindow?.webContents.send('menu:ai-improve') },
-          { label: 'Proofread', click: () => mainWindow?.webContents.send('menu:ai-proofread') },
-          { label: 'Translate...', click: () => mainWindow?.webContents.send('menu:ai-translate') }
-        ]
-      },
-      {
         label: 'Help',
         submenu: [
           { label: 'User Guide', click: () => mainWindow?.webContents.send('menu:guide') },
@@ -166,10 +155,6 @@ if (!gotLock) {
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(template))
   }
-
-  app.on('before-quit', () => {
-    stopOllama()
-  })
 
   app.whenReady().then(() => {
     registerAllIpc()

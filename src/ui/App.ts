@@ -1,10 +1,8 @@
 import type { CursusEditor } from '../editor/CursusEditor.ts'
 import { setupTheme } from './ThemeManager.ts'
 import { setupWelcomeGuide } from './WelcomeGuide.ts'
-import { setupAiSettings } from './AiSettings.ts'
 import { updateStatusBar, setupStatusBar } from './StatusBar.ts'
 import { setupSidebar, updateRecentDisplay, openFileInEditor, showEditor, updateHomeRecentList } from './Sidebar.ts'
-import { setupSelectionMenu } from './SelectionMenu.ts'
 
 const fmtMap: Record<string, string> = {
   md: 'markdown', html: 'html', htm: 'html', txt: 'text', docx: 'docx',
@@ -43,12 +41,10 @@ export function initUI(editor: CursusEditor): void {
 
   setupTheme()
   setupWelcomeGuide()
-  setupAiSettings(editor)
   setupStatusBar(editor)
   setupSidebar(editor)
   setupMenuListeners(editor)
   setupDragAndDrop(editor)
-  setupSelectionMenu(editor)
 
   document.getElementById('home-new')?.addEventListener('click', async () => {
     editor.clear()
@@ -68,10 +64,6 @@ export function initUI(editor: CursusEditor): void {
       await openFileInEditor(editor, filePath)
       startAutoSave(editor)
     }
-  })
-
-  document.getElementById('home-ai-settings')?.addEventListener('click', () => {
-    document.getElementById('ai-settings-overlay')?.classList.remove('hidden')
   })
 
   document.getElementById('home-guide')?.addEventListener('click', () => {
@@ -154,10 +146,6 @@ function setupMenuListeners(editor: CursusEditor): void {
     document.getElementById('btn-theme')?.click()
   })
 
-  api.onMenuEvent('menu:ai-settings', () => {
-    document.getElementById('ai-settings-overlay')?.classList.remove('hidden')
-  })
-
   api.onMenuEvent('menu:guide', () => {
     document.getElementById('welcome-overlay')?.classList.remove('hidden')
   })
@@ -184,7 +172,7 @@ function setupMenuListeners(editor: CursusEditor): void {
   api.onMenuEvent('menu:about', async () => {
     const version = await api.getVersion()
     window.alert(`Cursus v${version} (Beta)
-AI-powered rich text editor for students and teachers.
+Rich text editor for students and teachers.
 
 This is a development preview. Some features may be incomplete.
 Bugs and issues are being actively fixed.
