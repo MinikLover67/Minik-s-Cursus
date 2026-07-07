@@ -7,11 +7,12 @@ export const SlashCommandsExtension = Extension.create({
   name: 'slashCommands',
 
   addProseMirrorPlugins() {
-    const popup = createPopup()
+    const editor = this.editor
+    const popup = createPopup(editor)
 
     return [
       Suggestion({
-        editor: this.editor,
+        editor,
         char: '/',
         command: ({ editor, range, props }) => {
           const item = props as SlashCommandItem
@@ -31,20 +32,24 @@ export const SlashCommandsExtension = Extension.create({
           onExit: () => popup.onExit(),
           onKeyDown: (props) => {
             if (props.event.key === 'ArrowDown') {
-              const next = Math.min(popup.selectedIndex + 1, props.items.length - 1)
+              const next = Math.min(popup.selectedIndex + 1, popup.currentItems.length - 1)
               popup.selectedIndex = next
-              popup.onUpdate(props.items as SlashCommandItem[])
+              popup.onUpdate(popup.currentItems)
               return true
             }
             if (props.event.key === 'ArrowUp') {
               const prev = Math.max(popup.selectedIndex - 1, 0)
               popup.selectedIndex = prev
-              popup.onUpdate(props.items as SlashCommandItem[])
+              popup.onUpdate(popup.currentItems)
               return true
             }
             if (props.event.key === 'Enter') {
-              const item = props.items[popup.selectedIndex] as SlashCommandItem
-              if (item) props.command(item)
+              const item = popup.currentItems[popup.selectedIndex]
+              if (item) {
+                props.view.dispatch(props.view.state.tr.deleteRange(props.range.from, props.range.to))
+                item.action(editor)
+                popup.onExit()
+              }
               return true
             }
             if (props.event.key === 'Escape') {

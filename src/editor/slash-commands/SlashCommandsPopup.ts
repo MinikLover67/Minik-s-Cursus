@@ -1,14 +1,16 @@
+import type { Editor } from '@tiptap/core'
 import type { SlashCommandItem } from './commands.ts'
 
 export interface SlashPopup {
   dom: HTMLDivElement
   selectedIndex: number
+  currentItems: SlashCommandItem[]
   onStart: (items: SlashCommandItem[]) => void
   onUpdate: (items: SlashCommandItem[]) => void
   onExit: () => void
 }
 
-export function createPopup(): SlashPopup {
+export function createPopup(editor: Editor): SlashPopup {
   const dom = document.createElement('div')
   dom.className = 'slash-commands-popup'
   dom.style.cssText = `
@@ -42,7 +44,7 @@ export function createPopup(): SlashPopup {
       `
       if (i === selectedIndex) row.style.background = 'var(--bg-active, #0066cc)'
       row.onmouseenter = () => { selectedIndex = i; render(items) }
-      row.onclick = () => { item.action(item as any); onExit() }
+      row.onclick = () => { item.action(editor); onExit() }
 
       const label = document.createElement('span')
       label.textContent = item.label
@@ -90,6 +92,7 @@ export function createPopup(): SlashPopup {
     dom,
     get selectedIndex() { return selectedIndex },
     set selectedIndex(v: number) { selectedIndex = v },
+    get currentItems() { return currentItems },
     onStart(items: SlashCommandItem[]) {
       selectedIndex = 0
       render(items)
